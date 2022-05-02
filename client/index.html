@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - CoverFanz</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+
+    <h1>Read The Documentation Before Implementation </h1>
+
+    <div class="info-div">
+        <code>
+            Backend: NestJS GraphQL MongoDB Mongoose |
+            FrontEnd: React Native Apollo Client
+        </code>
+        <br>
+        <br>
+        <p>You just have to replace the url "https://coverfanz-backend.herokuapp.com/graphql" with the real address from client. All will be ok then.</p>
+
+        <p>
+            You don't have to do anything extra, Just put the qraphql query inside component and use them like described below. The code is going to updated everyday maybe with the latest feature and query. I will Keep
+            the updated query in this documentation, You just have to copy and paste the query. I am giving this postman documentation and schema definitions too, (will be updated on request). You can check that in
+            postman live. Before that, Please read this file.
+        </p>
+    </div>
+
+    <br>
+    <br>
+
+    <div class="flex-style">
+        <p>
+            <a href="https://documenter.getpostman.com/view/12881854/UVyrVGvj" target="_blank">Postman documentation (Not Updated) </a>
+        </p>
+
+        <p>
+            <a href="/schema.html">See Schema Definition</a>
+        </p>
+
+    </div>
+
+
+
+    <br>
+    <br>
+
+
+
+
+
+    <h2>Configure Apollo Client in App.tsx File</h2>
+    <p>Example: App.tsx</p>
+    <div class="info-div">
+        <pre>
+            <code>
+                import 'react-native-gesture-handler';
+                import React, { useEffect, useState } from 'react';
+                import AppLoading from 'expo-app-loading';
+                import { enableScreens } from 'react-native-screens';
+                import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
+                import AsyncStorage from '@react-native-async-storage/async-storage';
+                import { persistCache } from 'apollo3-cache-persist';
+
+                import MainNavigator from './navigation/Navigator';
+
+                enableScreens();
+
+                const cache = new InMemoryCache();
+
+                const client = new ApolloClient({
+                    uri: 'https://coverfanz-backend.herokuapp.com/graphql',
+                    cache,
+                    defaultOptions: { watchQuery: { fetchPolicy: 'cache-and-network' } },
+                });
+
+                const App = () => {
+                    const [loadingCache, setLoadingCache] = useState(true);
+
+                    useEffect(() => {
+                        persistCache({
+                        cache,
+                        storage: AsyncStorage,
+                        }).then(() => setLoadingCache(false));
+                    }, []);
+
+                    if (loadingCache) {
+                        // NOTE: Change Right angle bracket to Left Angle Bracket
+                        return (
+                            >AppLoading onFinish={()=> setLoadingCache(false)}/>
+                        );
+                    }
+
+                    // NOTE: Change Right angle bracket to Left Angle Bracket
+                    return (
+                        >ApolloProvider client={client}>
+                            >MainNavigator />
+                        >/ApolloProvider>
+                    );
+                };
+
+                export default App;
+            </code>
+        </pre>
+
+    </div>
+
+
+    <br>
+    <br>
+
+    <h2>Implement the Query Inside Any Components: For Mutations</h2>
+    <p>Example: AuthScreen.tsx</p>
+
+    <div class="info-div">
+        <pre>
+            <code>
+                // NOTE: Replace all left right angle to left angle,
+
+                import React from 'react';
+                import {
+                Text,
+                View,
+                KeyboardAvoidingView,
+                ScrollView,
+                TextInput as RNTextInput,
+                } from 'react-native';
+                import { Formik } from 'formik';
+                import { LinearGradient } from 'expo-linear-gradient';
+                import * as Yup from 'yup';
+                import { gql, useMutation } from '@apollo/client';
+
+                import Card from './../components/utils/Card';
+                import TextInput from './../components/utils/TextInput';
+                import Button from './../components/utils/Button';
+
+                interface AuthFormValues {
+                    email: string;
+                    password: string;
+                    username: string;
+                    userType: string;
+                }
+
+                const AFValidationSchema = Yup.object().shape({
+                    username: Yup.string()
+                    .required('Name is required')
+                    .min(3, ({ min }) => `Name must be at least ${min} characters`)
+                    .max(50, ({ max }) => `Name must be less than ${max} characters`)
+                    .label('Name'),
+
+                    email: Yup.string()
+                    .email('Please enter valid email')
+                    .required('Email is required')
+                    .label('Email'),
+
+                    password: Yup.string()
+                    .matches(/\w*[a-z]\w*/, 'Password must have a small letter')
+                    .matches(/\w*[A-Z]\w*/, 'Password must have a capital letter')
+                    .matches(
+                    /\w*[$&+,:;=?@#|'<>.^*()%!-]\w*/,
+                        'Password must have a special character'
+                        )
+                        .matches(/\d/, 'Password must have a number')
+                        .min(8, ({ min }) => `Password must be at least ${min} characters`)
+                        .required('Password is required')
+                        .label('Password'),
+
+                    userType: Yup.string().required('UserType is required').label('UserType'),
+                });
+
+                
+                const REGISTERUSER_QUERY = gql`
+                    mutation registerUser($input: CreateUserInput!) {
+                        registerUser(input: $input) {
+                        _id
+                        name
+                        email
+                        identifier
+                        username
+                        }
+                    }
+                `;
+
+                const AuthScreen: React.FC<{}> = (props) => {
+                    const [registerUser, { data, loading, error }] = useMutation(REGISTERUSER_QUERY);
+
+                    const passwordInputRef = React.useRef<RNTextInput>(null);
+                    const emailInputRef = React.useRef<RNTextInput>(null);
+                    const userTypeInputRef = React.useRef<RNTextInput>(null);
+
+                    const initialValues: AuthFormValues = {
+                        password: '',
+                        email: '',
+                        username: '',
+                        userType: '',
+                    };
+
+                    if (loading) return <Text>Submitting...</Text>;
+
+                    if (error) {
+                        console.log(error);
+                        return <Text>Submission error! {error.message} </Text>;
+                    }
+
+                    return (
+                        >KeyboardAvoidingView behavior='height' keyboardVerticalOffset={5} style={styles.screen}>
+                            >LinearGradient colors={['#ffedff', '#ffe3ff' ]} style={styles.gradient}>
+                                >Card style={styles.authContainer}>
+                                    >ScrollView>
+                                        >Formik initialValues={initialValues} validationSchema={AFValidationSchema} onSubmit={async (values)=> {
+                                                const user = await registerUser({
+                                                    variables: {
+                                                        input: {
+                                                        username: values.username,
+                                                        email: values.email,
+                                                        password: values.password,
+                                                        userType: values.userType,
+                                                        },
+                                                    },
+                                                });
+
+                                                // Congratulate user for successfull signup with  a modal or toast
+                                                console.log(user);
+
+                                                // Your data is now here, You can use this data to update redux store or contextAPI.
+                                        }}>
+                                            {({
+                                                handleChange,
+                                                handleBlur,
+                                                handleSubmit,
+                                                values,
+                                                errors,
+                                                touched,
+                                                isValid,
+                                                dirty,
+                                                }) => (
+                                            >View>
+
+                                                >View style={}>
+                                                    >TextInput icon='person' error={errors.username} touched={touched.username} placeholder='Your username' onChangeText={handleChange('username')}
+                                                        onBlur={handleBlur('username')} value={values.username} autoCorrect={false} autoCapitalize='none' autoCompleteType='username' keyboardType='default'
+                                                        returnKeyType='next' textContentType='username' returnKeyLabel='Next' blurOnSubmit={false} onSubmitEditing={()=> emailInputRef.current?.focus()}
+                                                        />
+
+                                                        {errors.username && touched.username && (
+                                                        >Text style={styles.redColorText}>{errors.username}>/Text>
+                                                        )}
+                                                >/View>
+
+
+                                                >View style={}>
+
+                                                    >TextInput icon='mail' error={errors.email} touched={touched.email} placeholder='Your email' onChangeText={handleChange('email')}
+                                                        onBlur={handleBlur('email')} value={values.email} autoCorrect={false} autoCapitalize='none' autoCompleteType='email' keyboardType='email-address'
+                                                        returnKeyType='next' textContentType='emailAddress' returnKeyLabel='Next' blurOnSubmit={false} ref={emailInputRef} onSubmitEditing={()=>
+                                                        passwordInputRef.current?.focus()}
+                                                        />
+
+                                                        {errors.email && touched.email && (
+                                                        >Text style={styles.redColorText}>{errors.email}>/Text>
+                                                        )}
+                                                >/View>
+
+                                                >View style={}>
+                                                    >TextInput icon='key' error={errors.password} touched={touched.password} placeholder='Your password' onChangeText={handleChange('password')}
+                                                        onBlur={handleBlur('password')} value={values.password} autoCapitalize='none' secureTextEntry textContentType='password' autoCompleteType='password'
+                                                        returnKeyType='next' returnKeyLabel='Next' onSubmitEditing={()=> userTypeInputRef.current?.focus()}
+                                                        blurOnSubmit={false}
+                                                        ref={passwordInputRef}
+                                                        />
+
+                                                        {errors.password && touched.password && (
+                                                        >Text style={styles.redColorText}>{errors.password}>/Text>
+                                                        )}
+                                                >/View>
+
+                                                >View style={}>
+                                                    >TextInput icon='key' error={errors.userType} touched={touched.userType} placeholder='Confirm your password' onChangeText={handleChange('userType')}
+                                                        onBlur={handleBlur('userType')} value={values.userType} autoCapitalize='none' secureTextEntry textContentType='password' autoCompleteType='password'
+                                                        returnKeyType='go' returnKeyLabel='Enter' onSubmitEditing={()=> handleSubmit()}
+                                                        ref={userTypeInputRef}
+                                                        />
+
+                                                        {errors.userType && touched.userType && (
+                                                        >Text style={styles.redColorText}>{errors.userType}>/Text>
+                                                        )}
+                                                >/View>
+
+                                                >View style={}>
+                                                    >Button onPress={handleSubmit as any} label='Signup' disabled={!(dirty && isValid)} />
+                                                >/View>
+                                            >/View>
+                                            )}
+                                        >/Formik>
+                                    >/ScrollView>
+                                >/Card>
+                            >/LinearGradient>
+                        >/KeyboardAvoidingView>
+                        );
+                    };
+
+                    export default AuthScreen;
+
+                </code>
+            </pre>
+    </div>
+
+
+    <br>
+    <br>
+
+    <h2>Implement the Query Inside Any Components: For Query</h2>
+    <p>Example: Example.tsx</p>
+
+    <div class="info-div">
+        <pre>
+            <code>
+                // NOTE: Replace all left right angle to left angle,
+
+                // Formik x React Native example
+                import React from 'react';
+                import { Text } from 'react-native';
+                import { gql, useQuery } from '@apollo/client';
+
+                const GETME_QUERY = gql`
+                    query {
+                        me {
+                            _id
+                            name
+                            email
+                            userType
+                            booking {
+                            _id
+                            }
+                        }
+                    }
+                `;
+
+                const Example: React.FC<{}> = (props) => {
+                    const { data, loading, error } = useQuery(GETME_QUERY);
+
+                    if (loading) return <Text>Loading...</Text>;
+
+                    if (error) {
+                        console.log(error);
+                        return >Text> error! {error.message} >/Text>;
+                    }
+
+                    return (
+                        >div>
+                            >h1>This is user {data.me.name} speaking........., Stay Calm>/h1>
+                            >p>You can now use any data to display the UI>/p>
+                        >/div>
+                    );
+                };
+
+                export default Example;
+            </code>
+        </pre>
+    </div>
+
+    <br> <br>
+
+    <hr>
+
+    <br>
+    <br>
+
+    <h1>All GraphQL Queries</h1>
+    <br> <br>
+    <h2>Authentications</h2>
+
+    <div class="info-div">
+        <pre>
+            <code>
+                <h2>Register User</h2>
+                <p>Mutation</p>
+
+                <pre>
+                    mutation registerUser($input:CreateUserInput!){
+                        registerUser(input:$input){
+                        _id
+                        email
+                        identifier
+                        userType
+                        ... 
+
+                        //NOTE: You will get all field specified in User Schema Type Definitions
+                        }
+                    }
+                </pre>
+
+        <p>Input</p>
+
+        <pre>
+                {
+                "input": {
+                "email":"monir.jvvt@gmail.com",
+                "password":"123",
+                "username": "monir74",
+                "userType":"fan"
+                }
+                }
+            </pre>
+
+        <p>Response</p>
+        <pre>
+            {
+            "data": {
+            "registerUser": {
+            "_id": "62470e8365b9215a330dd8c6",
+            "email": "monir.jvvt@gmail.com",
+            "identifier": "4467",
+            "userType": "fan"
+            }
+            }
+            }
+        </pre>
+        </code>
+
+        <code>
+            <h2>Login User</h2>
+            <p>Query</p>
+
+            <pre>
+                    mutation login($input:LoginUserInput!){
+                        login(input:$input){
+                            _id
+                            name
+                            email
+                        }
+                    }
+                </pre>
+
+            <p>Input</p>
+
+            <pre>
+                {
+                "input": {
+                "email": "monir.jbt@gmail.com",
+                "password": "456"
+                }
+                }
+
+            </pre>
+
+            <p>Response (2 - Valid or invalid)</p>
+            <pre>
+                // Valid
+                {
+                "data": {
+                "login": {
+                "_id": "62443dcf4189b1ceabd6543f",
+                "name": "Md. Moniruzzaman Monir",
+                "email": "monir.jct@gmail.com",
+                "userType": "venue"
+                }
+                }
+                }
+
+                // invalid
+                {
+                "errors": [
+                {
+                "message": "Invalid Username and Password",
+                "statusCode": 401
+                }
+                ],
+                "data": {
+                "login": null
+                }
+                }
+            </pre>
+
+        </code>
+
+        <code>
+            <h2>Log out</h2>
+            <p>Query</p>
+
+            <pre>
+                    query {
+                        logout{
+                            name
+                        }
+                    }
+
+                </pre>
+
+            <p>Response</p>
+            <pre>
+                    {
+                    "data": {
+                    "logout": null
+                    }
+                    }
+                </pre>
+        </code>
+
+        <code>
+            <h2>Delete My Account</h2>
+            <p>Query</p>
+
+            <pre>
+                    query {
+                        deleteMe{
+                            name
+                        }
+                    }
+
+                </pre>
+
+            <p>Response</p>
+            <pre>
+                    {
+                    "data": {
+                    "deleteMe": null
+                    }
+                    }
+                </pre>
+        </code>
+
+
+        </pre>
+    </div>
+
+
+
+
+    <br>
+    <br>
+
+    <h2>User</h2>
+
+    <div class="info-div">
+        <pre>
+            <code>
+                <h2>Get Current Logged In User</h2>
+                <p>Query</p>
+
+                <pre>
+                    query{
+                        me{
+                            _id
+                            name
+                            email
+                            userType
+                            booking{
+                            _id
+                            }
+                        }
+
+                    }
+                </pre>
+
+        <p>Response</p>
+        <pre>
+                    {
+                    "data": {
+                    "me": {
+                    "_id": "62443dcf4189b1ceabd6543f",
+                    "name": "Md. Moniruzzaman Monir",
+                    "email": "monir.jct@gmail.com",
+                    "userType": "venue",
+                    "entertrainerFeatures": "",
+                    "booking": [
+                    {
+                    "_id": "62470c9365b9215a330dd882"
+                    }
+                    ]
+                    }
+                    }
+                    }
+                </pre>
+        </code>
+
+        <code>
+            <h2>Update User Password</h2>
+            <p>Mutations</p>
+
+            <pre>
+                    mutation updatePassword($input: UpdatePassInput!){
+                        updatePassword(input:$input){
+                        _id
+                        name
+                        email
+                        }
+                    }
+                </pre>
+
+            <p>Input</p>
+
+            <pre>
+                {
+                "input": {
+                "passwordCurrent": "123",
+                "password": "456"
+                }
+                }
+
+            </pre>
+
+            <p>Response</p>
+
+            <pre>
+                {
+                "data": {
+                "updatePassword": {
+                "_id": "62443dcf4189b1ceabd6543f",
+                "name": "Md. Moniruzzaman Monir",
+                "email": "monir.jct@gmail.com"
+                }
+                }
+                }
+            </pre>
+        </code>
+
+
+        <code>
+            <h2>Update User Avatar</h2>
+            <p>REST API (URL https://www.domain.com/update/avatar) </p>
+
+            <pre>
+
+                </pre>
+
+            <p>Input</p>
+
+            <pre>
+                file input with the field name avatar
+
+            </pre>
+
+            <p>Response</p>
+
+            <pre>
+                ..............
+            </pre>
+        </code>
+
+        <code>
+            <h2>Update User Details</h2>
+            <p>Mutations</p>
+
+            <pre>
+                   mutation updateUserDetails($input: UpdateUserDetailsInput!){
+                   updateUserDetails(input:$input){
+                   _id
+                   name
+                   email
+                   userType
+                   }
+                   }
+                </pre>
+
+            <p>Input</p>
+
+            <pre>
+                {
+                "input":{
+                "name":"Md. Moniruzzaman Monir",
+                "entertrainerFeatures":"dancer,singer,others"
+                }
+                }
+
+                // please recieve entertrainer category (or Feature, eg: Dancer, singer), you will take that from a dropdown or checkbox (client wants that), if thats an array, then join that array elements by comma (,). 
+                Again you can split by comma if need the array again when fetch. EG. ['singer', 'dancer'] from user input, then do ['singer', 'dancer'].join() => 'singer,dancer'. push this string to database. 
+                Again when fetch this data, do 'singer,dancer'.split(',') will return back the array. if needed.
+
+            </pre>
+
+            <p>Response</p>
+
+            <pre>
+                {
+                "data": {
+                "updateUserDetails": {
+                "_id": "62443dc34189b1ceabd6543b",
+                "name": "Md. Moniruzzaman Monir",
+                "email": "monir.jdt@gmail.com",
+                "userType": "star"
+                }
+                }
+                }
+            </pre>
+        </code>
+
+
+
+        <code>
+            <h2>Get User By ID</h2>
+            <p>Query</p>
+
+            <pre>
+                   query($input:GetUserByIdInput!) {
+                   getUserById(input:$input){
+                   _id
+                   name
+                   email
+                   identifier
+                   booking{
+                   _id
+                   title
+                   status
+                   accepted
+                   fan_id{
+                   _id
+                   identifier
+                   }
+
+                   star_id{
+                   _id
+                   identifier
+                   }
+
+                   venue_id{
+                   _id
+                   }
+                   }
+                   }
+                   }
+                </pre>
+
+            <p>Input</p>
+
+            <pre>
+                {
+                "input": {
+                "_id": "62443dc34189b1ceabd6543b"
+                }
+                }
+
+            </pre>
+
+            <p>Response (2- Null or Userdata)</p>
+            <pre>
+
+                // User Data Response
+                {
+                "data": {
+                "getUserById": {
+                "_id": "62443dc34189b1ceabd6543b",
+                "name": "Md. Moniruzzaman Monir",
+                "email": "monir.jdt@gmail.com",
+                "identifier": "1546",
+                "booking": [
+                {
+                "_id": "62447fe5c53498049e117b2a",
+                "title": "Some title",
+                "status": "accepted",
+                "accepted": true,
+                "fan_id": {
+                "_id": "62443ddd4189b1ceabd65443",
+                "identifier": "1652"
+                },
+                "star_id": {
+                "_id": "62443dc34189b1ceabd6543b",
+                "identifier": "1546"
+                },
+                "venue_id": null
+                },
+                {
+                "_id": "62470c9365b9215a330dd882",
+                "title": "Some title",
+                "status": "pending",
+                "accepted": null,
+                "fan_id": null,
+                "star_id": {
+                "_id": "62443dc34189b1ceabd6543b",
+                "identifier": "1546"
+                },
+                "venue_id": {
+                "_id": "62443dcf4189b1ceabd6543f"
+                }
+                }
+                ]
+                }
+                }
+                }
+
+
+                // Null Response
+                {
+                "data": {
+                "getUserById": null
+                }
+                }
+
+                
+            </pre>
+        </code>
+
+        <code>
+            <h2>Get Logged In User Activity (We will marge arrays of booking review and promotion array and sort them by createdAt field at descending order) </h2>
+
+            <p>Query</p>
+
+            <pre>
+                   query{
+                   getMyActivity{
+                   _id
+                   name
+                   email
+                   userType
+                   booking{
+                   _id
+                   status
+                   accepted
+
+                   }
+                   review{
+                   _id
+                   title
+                   review_to{
+                   _id
+                   identifier
+                   }
+                   }
+                   promotion{
+                   _id
+                   discount
+                   }
+                   }
+
+                   }
+                </pre>
+
+
+
+            <p>Response</p>
+            <pre>
+
+                {
+                "data": {
+                "getMyActivity": {
+                "_id": "6248873a4107697ca42393dd",
+                "name": "",
+                "email": "monir.jbt@gmail.com",
+                "userType": "star",
+                "booking": [
+                {
+                "_id": "624ef2bf457fdde0c9118015",
+                "status": "pending",
+                "accepted": false
+                },
+                {
+                "_id": "624e000bdc3a0c43b5d44ca3",
+                "status": "accepted",
+                "accepted": true
+                },
+                {
+                "_id": "624d9bed444d4aac5398b3cd",
+                "status": "pending",
+                "accepted": false
+                },
+                {
+                "_id": "624d97a1d2c2c23f1096db98",
+                "status": "pending",
+                "accepted": false
+                },
+                {
+                "_id": "624d953f55a3ca8622f70839",
+                "status": "accepted",
+                "accepted": true
+                }
+                ],
+                "review": [
+                {
+                "_id": "624f181cafbc469c4ee8f380",
+                "title": "Nice Event",
+                "review_to": {
+                "_id": "6248873a4107697ca42393dd",
+                "identifier": "4746"
+                }
+                }
+                ],
+                "promotion": []
+                }
+                }
+                }
+
+                
+            </pre>
+        </code>
+
+
+
+        </pre>
+    </div>
+
+
+    <br>
+    <br>
+    <h2>Booking Events</h2>
+
+    <div class="info-div">
+        <pre>
+            <code>
+                <h2>Create A Booking on Star or Venue</h2>
+                <p>Mutations</p>
+
+                <pre>
+                    mutation createBooking($input:BookingInput!){
+                    createBooking(input:$input){
+                    _id
+                    title
+                    address
+                    }
+                    }
+                </pre>
+
+        <p>Input</p>
+
+        <pre>
+                    {
+                    "input": {
+                    "title":"Some title",
+                    "address":"Some address",
+                    "typeOfWork":"dance",
+                    "date":"10-02-2024",
+                    "startTime":"10:20",
+                    "endTime":"11:20",
+                    "terms":"some terms",
+                    "payment":20,
+                    "star_id":"62419f5806edc50b80a77380"
+                    }
+                    }
+                </pre>
+
+        <p>Response</p>
+
+        <pre>
+                {
+                "data": {
+                "createBooking": {
+                "_id": "62470c9365b9215a330dd882",
+                "title": "Some title",
+                "address": "Some address"
+                }
+                }
+                }
+            </pre>
+
+        </code>
+
+        <code>
+            <h2>Reject Booking Status By Star</h2>
+            <p>Mutations</p>
+
+            <pre>
+                    mutation rejectBookingStatusByStar($input: BookingIdInput!){
+                    rejectBookingStatusByStar(input:$input){
+                    _id
+                    title
+                    status
+                    accepted
+                    fan_id{
+                    _id
+                    }
+                    }
+                    }
+                </pre>
+
+            <p>Input</p>
+
+            <pre>
+                    {
+                    "input": {
+                    "booking_id": "someId Here"
+                    }
+                    }
+                </pre>
+
+            <p>Response</p>
+
+            <pre>
+                .....
+            </pre>
+
+        </code>
+
+        <code>
+            <h2>Update Booking Status By Star With Terms</h2>
+            <p>Mutations</p>
+
+            <pre>
+                    mutation updateBookingStatusByStarWithTerms($input: BookingInputByStar!){
+                    updateBookingStatusByStarWithTerms(input:$input){
+                    _id
+                    title
+                    status
+                    accepted
+                    fan_id{
+                    _id
+                    }
+                    }
+                    }
+                </pre>
+
+            <p>Input</p>
+
+            <pre>
+                   {
+                   "input": {
+                   "booking_id": "62447fe5c53498049e117b2a",
+                   "termsByStar": "some terms",
+                   "restrictionsByStar": "some restrictions"
+                   }
+                   }
+                </pre>
+
+            <p>Response</p>
+
+            <pre>
+                ........
+            </pre>
+
+        </code>
+
+        <code>
+            <h2>Update Final Booking Status With Payment By Sender (Sender Get Venmo Username then pay in venmo app)</h2>
+            <p>Mutations</p>
+
+            <pre>
+                    mutation updateBookingFinalStatusBySenderWithPayment($input: UpdateBookingFinalStatusInputBySender!){
+                    updateBookingFinalStatusBySenderWithPayment(input:$input){
+                    _id
+                    title
+                    status
+                    accepted
+                    fan_id{
+                    _id
+                    }
+                    }
+                    }
+                </pre>
+
+            <p>Input</p>
+
+            <pre>
+                   {
+                   "input": {
+                   "booking_id": "some id",
+                   "accepted": true
+                   }
+                   }
+                </pre>
+
+            <p>Response</p>
+
+            <pre>
+                ..........
+            </pre>
+
+        </code>
+
+        <code>
+            <h2>Reject Final Booking Status by sender (When Sender is not agree with terms and restrictions set by Star) </h2>
+            <p>Mutations</p>
+
+            <pre>
+                    mutation rejectFinalBookingStatusBySender($input: BookingIdInput!){
+                    rejectFinalBookingStatusBySender(input:$input){
+                    _id
+                    title
+                    }
+                    }
+                </pre>
+
+            <p>Input</p>
+
+            <pre>
+                    {
+                    "input": {
+                    "booking_id":"some id"
+                    }
+                    }
+                </pre>
+
+            <p>Response</p>
+
+            <pre>
+                ..........
+            </pre>
+
+        </code>
+
+        <code>
+            <h2>Get All The Next Booking Events By Star ID </h2>
+            <p>Query</p>
+
+            <pre>
+                     query($input:UserIdInput!) {
+                     getNextBookingEventsByStarId(input:$input){
+                     _id
+                     title
+                     location
+                     fan_id{
+                     _id
+                     }
+                     venue_id{
+                     _id
+
+                     }
+                     }
+                     }
+                </pre>
+
+            <p>Input</p>
+
+            <pre>
+                    {
+                    "input": {
+                    "_id": "6248873a4107697ca42393dd"
+                    }
+                    }
+                </pre>
+
+            <p>Response</p>
+
+            <pre>
+                ..........
+            </pre>
+
+        </code>
+
+        <code>
+            <h2>Get user Associated Event Weekly or Monthly For Showing in Calender </h2>
+            <p>Query</p>
+
+            <pre>
+                    query($input:DateRangeInput!) {
+                    getUserAssociatedEventsWeeklyOrMonthly(input:$input){
+                    _id
+                    title
+                    date
+                    payment
+                    }
+                    }
+                </pre>
+
+            <p>Input</p>
+
+            <pre>
+                    {
+                    "input": {
+                    "type": "week"
+                    }
+                    }
+                </pre>
+
+            <p>Response</p>
+
+            <pre>
+                ..........
+            </pre>
+
+        </code>
+
+
+
+        </pre>
+    </div>
+
+
+    <br>
+    <br>
+
+    <h2>Search Venue, Star or By Category</h2>
+
+    <div class="info-div">
+        <pre>
+            <code>
+                <h2>Get Performar By Name or identifier</h2>
+                <p>Query</p>
+
+                <pre>
+                    query($input:SearchInput!){
+                    getPerformerByNameOrIdentifier(input:$input){
+                    _id
+                    name
+                    email
+                    identifier
+                    userType
+
+                    booking{
+                    _id
+                    status
+                    accepted
+                    fan_id{
+                    _id
+                    identifier
+                    email
+                    name
+                    }
+
+                    star_id{
+                    _id
+                    name
+                    email
+                    identifier
+                    }
+                    }
+                    }
+
+                    }
+                </pre>
+
+        <p>Input</p>
+
+        <pre>
+                    {
+                    "input": {
+                    "query": "15"
+                    }
+                    }
+                </pre>
+
+
+        <p>Response</p>
+
+        <pre>
+                {
+                "data": {
+                "getPerformerByNameOrIdentifier": [
+                {
+                "_id": "62443dc34189b1ceabd6543b",
+                "name": "Md. Moniruzzaman Monir",
+                "email": "monir.jdt@gmail.com",
+                "identifier": "1546",
+                "userType": "star"
+                },
+                {
+                "_id": "62443df44189b1ceabd65447",
+                "name": "",
+                "email": "monir.jat@gmail.com",
+                "identifier": "1568",
+                "userType": "admin"
+                }
+                ]
+                }
+                }
+            </pre>
+
+        </code>
+
+        <code>
+            <h2>Get Venur By Name or Address</h2>
+            <p>Query</p>
+
+            <pre>
+                   query($input:SearchInput!){
+                   getVenueByNameOrAddress(input:$input){
+                   _id
+                   name
+                   email
+                   userType
+                   location
+                   }
+
+                   }
+
+                   {
+                   "input": {
+                   "query": "monir"
+                   }
+                   }
+                </pre>
+
+            <p>Response</p>
+
+            <pre>
+                {
+                "data": {
+                "getVenueByNameOrAddress": [
+                {
+                "_id": "62443dc34189b1ceabd6543b",
+                "name": "Md. Moniruzzaman Monir",
+                "email": "monir.jdt@gmail.com",
+                "userType": "star",
+                "location": ""
+                },
+                {
+                "_id": "62443dcf4189b1ceabd6543f",
+                "name": "Md. Moniruzzaman Monir",
+                "email": "monir.jct@gmail.com",
+                "userType": "venue",
+                "location": ""
+                },
+                {
+                "_id": "62443ddd4189b1ceabd65443",
+                "name": "Moniruzzaman",
+                "email": "monir.jbt@gmail.com",
+                "userType": "fan",
+                "location": ""
+                }
+                ]
+                }
+                }
+            </pre>
+
+        </code>
+
+        <code>
+            <h2>Get Star By Category/Entertrainer Feature</h2>
+            <p>Query</p>
+
+            <pre>
+                query($input:SearchInput!){
+                getStarByEntertrainerFeature(input:$input){
+                _id
+                name
+                email
+                identifier
+                userType
+                entertrainerFeatures
+
+                }
+
+                }
+            </pre>
+
+            <p>Input</p>
+
+            <pre>
+                {
+                "input": {
+                "query": "dancer"
+                }
+                }
+            </pre>
+
+            <p>Response</p>
+
+            <pre>
+                {
+                "data": {
+                "getStarByEntertrainerFeature": [
+                {
+                "_id": "62443dc34189b1ceabd6543b",
+                "name": "Md. Moniruzzaman Monir",
+                "email": "monir.jdt@gmail.com",
+                "identifier": "1546",
+                "userType": "star",
+                "entertrainerFeatures": "dancer, singer, others"
+                }
+                ]
+                }
+                }
+            </pre>
+
+        </code>
+        </pre>
+    </div>
+
+    <!-- -->
+
+    <br>
+    <br>
+
+
+    <!--XXXXXXXXXXXXXXXXXXXXXXXX-->
+    <h2>Promotions</h2>
+
+    <div class="info-div">
+        <pre>
+        <code>
+                <h2>Create Promotions (Only for Venue profile)</h2>
+                <p>Mutations</p>
+
+                <pre>
+                   mutation createPromotion($input:PromotionInput!){
+                   createPromotion(input:$input){
+                   _id
+                   title
+                   }
+                   }
+                </pre>
+
+        <p>Input</p>
+
+        <pre>
+                    {
+                    "input": {
+                    "title": "Some Promotion title",
+                    "description": "Some Description",
+                    "discount": 10,
+                    "expiration": "2022-05-08T00:10:25+06:00",
+                    "booking_id": "624d953f55a3ca8622f70839"
+                    }
+                    }
+                </pre>
+
+        </code>
+
+        <code>
+            <h2>Delete All Expired Promotions</h2>
+            <pre>
+                deleteExpiredPromotions()
+                This is a cron Job runs on every midnight 12.00am.
+            </pre>
+        </code>
+
+        <code>
+            <h2>Get Promotion By ID</h2>
+            <pre>
+                Can be added later if required by front end.
+            </pre>
+        </code>
+
+
+        <code>
+            <h2 style="color: red;">Delete Promotions (Implemented By My Idea, May be use on Futute Update)</h2>
+            <p>Query</p>
+
+            <pre>
+                   query($input:PromotionIdInput!) {
+                   deletePromotionById(input:$input){
+                   _id
+                   }
+                   }
+                </pre>
+
+            <p>Input</p>
+
+            <pre>
+                    ....
+                </pre>
+
+        </code>
+        </pre>
+    </div>
+
+
+    <br>
+    <br>
+
+
+    <!--XXXXXXXXXXXXXXXXXXXXXXXX-->
+    <h2>Reports</h2>
+
+    <div class="info-div">
+        <pre>
+            <code>
+                <h2>Submit Report (For Any User to Any User)</h2>
+                <p>Mutations</p>
+
+                <pre>
+                   mutation submitReport($input:ReportInput!){
+                   submitReport(input:$input){
+                   report
+                   reportTime
+                   reportedBy{
+                   _id
+                   }
+                   }
+                   }
+                </pre>
+
+        <p>Input</p>
+
+        <pre>
+                    {
+                    "input": {
+                    "report": "This is a report",
+                    "reportTime": "2022-04-07T03:11:31+06:00",
+                    "reportedTo": "6248873a4107697ca42393dd"
+                    }
+                    }
+                </pre>
+
+        </code>
+
+        <code>
+            <pre>
+                <h2>Rest of All Reports Feature are in Admin Access -> See There</h2>
+            </pre>
+        </code>
+        </pre>
+    </div>
+
+
+
+    <br>
+    <br>
+
+
+    <!--XXXXXXXXXXXXXXXXXXXXXXXX-->
+    <h2>Features (Dynamic Category for Entertrainer Feature, eg, dancer, music etc)</h2>
+
+    <div class="info-div">
+        <pre>
+            <code>
+                <h2>Get All Feature as array for Using in Front End dropdown menue</h2>
+                <p>Query</p>
+
+                <pre>
+                   query{
+                   getAllFeaturesAsArray
+                   }
+                </pre>
+
+        <p>Response</p>
+
+        <pre>
+                    {
+                    "data": {
+                    "getAllFeaturesAsArray": [
+                    "dance",
+                    "music"
+                    ]
+                    }
+                    }
+                </pre>
+
+        </code>
+
+        <code>
+            <h2>Rest of All Feature Functionalities are for Admin - See Admin Access</h2>
+        </code>
+        </pre>
+    </div>
+
+    <br>
+    <br>
+
+
+    <!--XXXXXXXXXXXXXXXXXXXXXXXX-->
+    <h2>Admin Access</h2>
+
+    <div class="info-div">
+        <h1>Manage User</h1>
+        <pre>
+            <code>
+                <h2>Get All User (Restricted to Admin)</h2>
+                <p>Query</p>
+
+                <pre>
+                   query {
+                    allUser{
+                    _id
+                    name
+                    email
+                    identifier
+                    booking{
+                    _id
+                    address
+                    fan_id{
+                    _id
+                    identifier
+
+                    }
+
+                    star_id{
+                    _id
+                    }
+
+                    venue_id{
+                    _id
+                    }
+                    }
+                    }
+                   }
+                </pre>
+
+        <p>Response</p>
+        <pre>
+                    // I just put two field for keeping simple
+                    {
+                    "data": {
+                    "allUser": [
+                    {
+                    "_id": "62443db64189b1ceabd65437",
+                    "identifier": "7787"
+                    },
+                    {
+                    "_id": "62443dc34189b1ceabd6543b",
+                    "identifier": "1546"
+                    },
+                    {
+                    "_id": "62443dcf4189b1ceabd6543f",
+                    "identifier": "4237"
+                    },
+                    {
+                    "_id": "62443ddd4189b1ceabd65443",
+                    "identifier": "1652"
+                    },
+                    {
+                    "_id": "62443df44189b1ceabd65447",
+                    "identifier": "1568"
+                    },
+                    {
+                    "_id": "6246aa11a57eca2b1d8d4bd2",
+                    "identifier": "7018"
+                    },
+                    {
+                    "_id": "6246aaed339107b06fcb75d1",
+                    "identifier": "7927"
+                    }
+                    ]
+                    }
+                    }
+                </pre>
+        </code>
+
+        <code>
+            <h2>Baning User (Rerstricted to Admin)</h2>
+            <p>Query</p>
+
+            <pre>
+                   query($input:UserIdInput!) {
+                   banUserByAdmin(input:$input){
+                   _id
+                   name
+                   email
+                   }
+                   }
+                </pre>
+
+
+
+            <p>Response</p>
+            <pre>
+                banned user here
+            </pre>
+
+            <p>Input</p>
+            <pre>
+               {
+               "input": {
+               "_id":"Some Id"
+               }
+               }
+            </pre>
+        </code>
+
+        <code>
+            <h2>Delete User (Rerstricted to Admin, Everything Will be deleted associated with this User)</h2>
+            <p>Query</p>
+
+            <pre>
+                   query($input:UserIdInput!) {
+                   deleteUserByAdmin(input:$input){
+                   _id
+                   name
+                   email
+                   }
+                   }
+                </pre>
+
+
+
+            <p>Response</p>
+            <pre>
+                null
+            </pre>
+
+            <p>Input</p>
+            <pre>
+               {
+               "input": {
+               "_id":"Some Id"
+               }
+               }
+            </pre>
+        </code>
+
+        <hr>
+
+        <h1>Manage Feature (Category)</h1>
+
+
+        <code>
+            <h2>Create Feature Category</h2>
+            <p>Mutations</p>
+
+            <pre>
+                  mutation createFeature($input:FeatureInput!){
+                  createFeature(input:$input){
+                  _id
+                  entertrainerFeature
+                  }
+                  }
+                </pre>
+
+
+
+            <p>Response</p>
+            <pre>
+                .......
+            </pre>
+
+            <p>Input</p>
+            <pre>
+              {
+              "input": {
+              "entertrainerFeature": "singer"
+              }
+              }
+            </pre>
+        </code>
+
+        <code>
+            <h2 style="color: red;">Get All Feature (Future Update) </h2>
+            <p>Query</p>
+
+            <pre>
+                   query{
+                   getAllFeatures{
+                   _id
+                   entertrainerFeature
+                   }
+
+                   }
+                </pre>
+
+
+
+            <p>Response</p>
+            <pre>
+                ...
+            </pre>
+        </code>
+
+
+
+        <code>
+            <h2 style="color: red;">Delete Feature By Id (Future Update) </h2>
+            <p>Query</p>
+
+            <pre>
+                    query($input:FeatureIdInput!) {
+                    deleteFeatureById(input:$input){
+                    entertrainerFeature
+                    _id
+                    }
+                    }
+                </pre>
+
+
+
+            <p>Response</p>
+            <pre>
+                ...
+            </pre>
+
+            <p>Input</p>
+            <pre>
+                  "input": {
+                  "_id": "624e9f235ceef7f980b69bed"
+                  }
+                  }
+            </pre>
+        </code>
+
+        <br>
+
+        <hr>
+        <br>
+
+        <h1>Manage Report</h1>
+        <code>
+            <h2>Get All Reports</h2>
+            <p>Query</p>
+            <pre>
+                query{
+                getAllReports{
+                _id
+                report
+                }
+
+                }
+            </pre>
+        </code>
+
+
+        <code>
+            <h2 style="color: red;">Get A User All Reports (Future Update)</h2>
+            <p>Query</p>
+            <pre>
+                 query($input:UserIdInput!) {
+                 getUserAllReportsById(input:$input){
+                 report
+                 _id
+                 }
+                 }
+            </pre>
+
+            <p>Input</p>
+
+            <pre>
+                {
+                "input": {
+                "_id": "6248873a4107697ca42393dd"
+                }
+                }
+            </pre>
+
+        </code>
+
+        <code>
+            <h2 style="color: red;">Delete Report By ID (Future Update)</h2>
+            <p>Query</p>
+            <pre>
+                  query($input:UserIdInput!) {
+                  deleteReportById(input:$input){
+                  report
+                  _id
+                  }
+                  }
+            </pre>
+
+            <p>Input</p>
+
+            <pre>
+                {
+                "input": {
+                "_id": "6248873a4107697ca42393dd"
+                }
+                }
+            </pre>
+
+        </code>
+
+
+        </pre>
+    </div>
+
+
+
+
+    <br>
+    <br>
+
+
+    <!--XXXXXXXXXXXXXXXXXXXXXXXX-->
+    <h2>Review</h2>
+
+    <div class="info-div">
+        <pre>
+            <code>
+                <h2>Submit A Review On past associated Event </h2>
+                <p>Mutations</p>
+
+                <pre>
+                   mutation submitReview($input:ReviewInput!){
+                   submitReview(input:$input){
+                   _id
+                   title
+                   rating
+                   }
+                   }
+                </pre>
+
+        <p>Input</p>
+
+        <pre>
+                    {
+                    "input": {
+                    "title": "Nice Event",
+                    "message": "This is a nice event",
+                    "rating": 4.6,
+                    "booking_id": "624d953f55a3ca8622f70839"
+                    }
+                    }
+                </pre>
+
+        </code>
+
+        <code>
+
+            <h2>Calculating Rating By Star, Rating By Venue, Rating By Fan</h2>
+            <pre>
+                These Functionalities are dynamically Calculating on the server. Each Creation will calculate the rating for the associated user on that specific event.
+            </pre>
+        </code>
+
+        <code>
+            <h2>Get Associatesd Review on a Booking (When user clicks a event they already provided review)</h2>
+
+            <p>Query</p>
+
+            <pre>
+                     query($input:BookingIdInput!) {
+                     getAssociatedReviewByBookingEventId(input:$input){
+                     _id
+                     title
+                     message
+                     reviewed_by{
+                     _id
+                     }
+                     }
+                     }
+            </pre>
+
+            <p>Input</p>
+
+            <pre>
+                {
+                "input": {
+                "booking_id": "624d953f55a3ca8622f70839"
+                }
+                }
+            </pre>
+        </code>
+        </pre>
+    </div>
+
+</body>
+
+</html>

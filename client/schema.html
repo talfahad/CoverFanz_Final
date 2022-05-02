@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schema File</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <h1>Read The Schema Definition If Needed</h1>
+
+    <div class="info-div">
+        <code>
+            Backend: NestJS GraphQL MongoDB Mongoose |
+            FrontEnd: React Native Apollo Client
+        </code>
+        <br>
+        <br>
+    </div>
+
+    <br>
+    <br>
+
+    <p>
+        <a href="/index.html">Go Back to Documentation</a>
+    </p>
+
+
+    <br>
+    <br>
+
+    <h1>CoverFanz Schema Definition (Ping me for latest Update)</h1>
+
+    <div class="info-div">
+        <pre>
+          <code>
+              # ------------------------------------------------------
+              # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+              # ------------------------------------------------------
+
+              type Booking {
+              _id: ID!
+              title: String!
+              typeOfWork: String!
+              termsByStar: String!
+              restrictionsByStar: String!
+              date: DateTime!
+              payment: Float!
+              startTime: String!
+              endTime: String!
+              hoursWorked: Float!
+              location: String!
+              isPersonal: Boolean!
+              accepted: Boolean
+              status: String!
+              star_id: User!
+              fan_id: User
+              venue_id: User
+              createdAt: DateTime!
+              }
+
+              """
+              A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+              """
+              scalar DateTime
+
+              type Review {
+              _id: ID!
+              title: String!
+              message: String!
+              rating: Float!
+              reviewer_type: String!
+              review_to: User!
+              reviewed_by: User!
+              booking_id: Booking!
+              createdAt: DateTime!
+              }
+
+              type Promotion {
+              _id: ID!
+              title: String!
+              description: String!
+              discount: Float!
+              expiration: DateTime!
+              star_id: User!
+              venue_id: User!
+              booking_id: Booking!
+              createdAt: DateTime!
+              }
+
+              type User {
+              _id: ID!
+              name: String!
+              email: String!
+              avatar: String!
+              userType: String!
+              username: String!
+              venmoUsername: String!
+              identifier: String!
+              description: String!
+              active: Boolean!
+              premium: Boolean!
+              entertrainerFeatures: String!
+              mediaUrl: String!
+              location: String!
+              phoneNumber: String!
+              ratingByStar: Float!
+              ratingByVenue: Float!
+              ratingByFan: Float!
+              booking: [Booking!]
+              review: [Review!]
+              promotion: [Promotion!]
+              googleId: String!
+              socialAccount: Boolean!
+              }
+
+              type Report {
+              _id: ID!
+              reportTime: DateTime!
+              report: String!
+              reportedBy: User!
+              reportedTo: User!
+              createdAt: DateTime!
+              }
+
+              type Feature {
+              _id: ID!
+              entertrainerFeature: String!
+              }
+
+              type Query {
+              me: User
+              getMyActivity: User
+              getUserById(input: UserIdInput!): User
+              getPerformerByNameOrIdentifier(input: SearchInput!): [User!]
+              getStarByEntertrainerFeature(input: SearchInput!): [User!]
+              getVenueByNameOrAddress(input: SearchInput!): [User!]
+              allUser: [User!]
+              banUserByAdmin(input: UserIdInput!): User!
+              deleteMe: User
+              deleteUserByAdmin(input: UserIdInput!): User!
+              logout: User
+              getAssociatedReviewByBookingEventId(input: BookingIdInput!): Review
+              getNextBookingEventsByStarId(input: UserIdInput!): [Booking!]!
+              getUserAssociatedEventsWeeklyOrMonthly(input: DateRangeInput!): [Booking!]!
+              deletePromotionById(input: PromotionIdInput!): Promotion
+              getAllReports: [Report!]!
+              getUserAllReportsById(input: UserIdInput!): [Report!]!
+              deleteReportById(input: UserIdInput!): Report
+              getAllFeatures: [Feature!]!
+              getAllFeaturesAsArray: [String!]!
+              deleteFeatureById(input: FeatureIdInput!): Feature
+              }
+
+              input UserIdInput {
+              _id: String!
+              }
+
+              input SearchInput {
+              query: String!
+              limit: Float
+              }
+
+              input BookingIdInput {
+              booking_id: String!
+              }
+
+              input DateRangeInput {
+              type: String!
+              }
+
+              input PromotionIdInput {
+              promotion_id: String!
+              }
+
+              input FeatureIdInput {
+              _id: String!
+              }
+
+              type Mutation {
+              registerUser(input: CreateUserInput!): User!
+              updatePassword(input: UpdatePassInput!): User!
+              updateUserDetails(input: UpdateUserDetailsInput!): User!
+              login(input: LoginUserInput!): User
+              submitReview(input: ReviewInput!): Review!
+              createBooking(input: BookingInput!): Booking!
+              rejectBookingStatusByStar(input: BookingIdInput!): Booking!
+              updateBookingStatusByStarWithTerms(input: BookingInputByStar!): Booking!
+              updateBookingFinalStatusBySenderWithPayment(input: UpdateBookingFinalStatusInputBySender!): Booking!
+              rejectFinalBookingStatusBySender(input: BookingIdInput!): Booking!
+              createPromotion(input: PromotionInput!): Promotion!
+              submitReport(input: ReportInput!): Report!
+              createFeature(input: FeatureInput!): Feature!
+              }
+
+              input CreateUserInput {
+              password: String!
+              username: String!
+              venmoUsername: String!
+              email: String!
+              userType: String!
+              name: String!
+              description: String!
+              entertrainerFeatures: String
+              mediaUrl: String
+              location: String
+              phoneNumber: String
+              avatar: String
+              }
+
+              input UpdatePassInput {
+              password: String!
+              passwordCurrent: String!
+              }
+
+              input UpdateUserDetailsInput {
+              name: String
+              location: String
+              description: String
+              entertrainerFeatures: String
+              mediaUrl: String
+              phoneNumber: String
+              }
+
+              input LoginUserInput {
+              password: String!
+              email: String!
+              }
+
+              input ReviewInput {
+              title: String!
+              message: String!
+              rating: Float!
+              booking_id: String!
+              }
+
+              input BookingInput {
+              title: String!
+              location: String!
+              typeOfWork: String!
+              date: String!
+              startTime: String!
+              endTime: String!
+              payment: Float!
+              star_id: String!
+              }
+
+              input BookingInputByStar {
+              termsByStar: String
+              restrictionsByStar: String
+              booking_id: String!
+              }
+
+              input UpdateBookingFinalStatusInputBySender {
+              booking_id: String!
+              accepted: Boolean!
+              }
+
+              input PromotionInput {
+              title: String!
+              description: String!
+              discount: Float!
+              booking_id: String!
+              expiration: String!
+              }
+
+              input ReportInput {
+              report: String!
+              reportedTo: String!
+              reportTime: String!
+              }
+
+              input FeatureInput {
+              entertrainerFeature: String!
+              }
+
+          </code>
+        </pre>
+
+    </div>
+
+</body>
+
+</html>

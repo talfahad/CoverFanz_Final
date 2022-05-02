@@ -1,0 +1,35 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Syne+Mono&display=swap');
+
+body {
+  padding: 50px;
+  font-family: 'Syne Mono', monospace;
+}
+
+h1 {
+  text-transform: uppercase;
+}
+
+.info-div {
+  background: #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+a {
+  text-decoration: none;
+  background: #1d5eef;
+  padding: 10px;
+  border-radius: 10px;
+  color: #fff;
+  margin-top: 15px;
+}
+.flex-style {
+  display: flex;
+  justify-content: space-around;
+}

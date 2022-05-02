@@ -1,0 +1,45 @@
+{{>header}}
+  <div class='container container-body'>
+    <div class='container-child'>
+      <div class='et-body'>
+        <div class='et-body__image'>
+          <img
+            src='https://i.ibb.co/YfLmc68/confirmation-email.png'
+            alt='Confirmation Email'
+          />
+        </div>
+        <div class='et-body__main'>
+          <h2 class='m-20'>Email Confirmation!</h2>
+
+          <p>Hello {{userName}},</p>
+
+          <p>We have received a request to create an user account on your email
+            <strong>{{userEmail}}</strong>. For further proccedings we need to confim your email.
+          </p>
+
+          <p class='m-20'>You can can confirm your email by clicking the link below.</p>
+
+          <div class='et-cta m-20'>
+            <div class='et-cta__link'>
+              <a href={{url}}>CONFIRM YOUR EMAIL</a>
+            </div>
+          </div>
+
+          <div class='hr-line'>
+            <div class='hr-line__main'>
+              <hr />
+            </div>
+          </div>
+
+          <p>Just so you know. You have 72 hours to confirm your email. After
+            that, you'll have to signup again.</p>
+
+          <p class='m-20'>Didn't request for account creation? You can ignore this
+            email.</p>
+
+          <p>-- {{companyName}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+{{>footer}}

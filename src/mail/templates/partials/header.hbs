@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .container {
+            width: 100%;
+        }
+
+        .container-child {
+            overflow: hidden;
+            width: 600px;
+            margin: 0 auto;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .container-child {
+                width: 300px !important;
+            }
+        }
+
+        .m-20 {
+            margin: 20px 0;
+        }
+
+        .social_icons {}
+
+        .social_icons a {
+            text-decoration: none;
+            padding: 10px;
+        }
+
+        /** Header */
+        .container-header {
+            display: block;
+            height: 80px;
+            width: 100%;
+            background: #f6f6f6;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .container-header {
+                height: 130px !important;
+            }
+        }
+
+        .et-header {
+            display: block;
+            padding: 10px;
+            height: 150px;
+        }
+
+        .et-header__logo-left {
+            height: 80px;
+            display: table;
+            float: left;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .et-header__logo-left {
+                display: block !important;
+                height: 50px !important;
+                width: 100% !important;
+            }
+        }
+
+        .et-header__logo-left a {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .et-header__logo-left a {
+                margin: 0 auto !important;
+                display: block !important;
+            }
+        }
+
+        .et-header__logo-left a img {
+            width: 150px;
+            height: 50px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .et-header__logo-left a img {
+                margin: 0 auto !important;
+            }
+        }
+
+        .et-header__icons-right {
+            height: 80px;
+            float: right;
+            display: table;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .et-header__icons-right {
+                width: 100% !important;
+                display: table !important;
+            }
+        }
+
+        .et-header__icons-right a {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .et-header__icons-right a {
+                display: table-cell !important;
+                vertical-align: middle !important;
+                text-align: center !important;
+            }
+        }
+
+        /** Body */
+
+        .container-body {
+            display: block;
+        }
+
+        .et-body {
+            padding: 10px;
+        }
+
+        .et-body__image {
+            display: table;
+            width: 100%;
+        }
+
+        .et-body__image img {
+            width: 300px;
+            height: 250px;
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+            margin: 20px auto;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .et-body__image img {
+                width: 200px !important;
+                height: 150px !important;
+            }
+        }
+
+        .et-body__main {
+            padding: 20px 0;
+        }
+
+        .et-body__main .hr-line {
+            width: 100%;
+        }
+
+        .et-body__main .hr-line .hr-line__main {
+            width: 400px;
+            height: 10px;
+            display: block;
+            text-align: center;
+            vertical-align: middle;
+            margin: 0 auto;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .et-body__main .hr-line .hr-line__main {
+                width: 250px !important;
+            }
+        }
+
+        .et-body__main a {}
+
+        .et-cta {
+            width: 100%;
+        }
+
+        .et-cta__link {
+            width: 300px;
+            height: 40px;
+            display: block;
+            text-align: center;
+            vertical-align: middle;
+            margin: 0 auto;
+        }
+
+        .et-cta__link a {
+            text-decoration: none;
+            padding: 10px 20px;
+            background: #ff9c35;
+            border-radius: 100px;
+            color: #fff;
+        }
+
+        /** Extra */
+        .container-extra {
+            display: block;
+            background: #f6f6f6;
+            padding: 20px 0;
+        }
+
+        .et-extra {
+            padding: 20px 0;
+        }
+
+        .et-extra__heading {
+            padding: 10px;
+        }
+
+        .et-extra__box {
+            margin: 20px 0;
+            display: table;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .et-extra__box h3 {
+            margin-bottom: 10px;
+        }
+
+        .et-extra__box img {
+            width: 30px;
+            height: 30px;
+        }
+
+        .et-extra__box-1 {
+            height: 150px;
+            background: #fff;
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+            border-right: 5px solid #f6f6f6;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .et-extra__box-1 {
+                margin: 10px !important;
+                display: block !important;
+                border-right: none !important;
+                border-bottom: 5px solid #f6f6f6 !important;
+            }
+        }
+
+        .et-extra__box-2 {
+            height: 150px;
+            background: #fff;
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .et-extra__box-2 {
+                margin: 10px !important;
+                display: block !important;
+            }
+        }
+
+        .et-extra__info {
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .et-extra__info {
+                letter-spacing: 0px !important;
+            }
+        }
+
+        /** Footer */
+        .container-footer {
+            width: 100%;
+            display: block;
+            background: #ff9c35;
+            text-align: center;
+            color: #fff;
+        }
+
+        .et-footer {
+            padding: 10px;
+            margin: 20px 0;
+        }
+
+        .et-footer__menu {
+            margin-bottom: 20px;
+        }
+
+        .et-footer__menu ul {
+            list-style: none;
+        }
+
+        .et-footer__menu ul li {
+            display: inline-block;
+            margin: 0 20px;
+        }
+
+        .et-footer__menu ul li a {
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .et-footer__social {
+            margin-bottom: 20px;
+        }
+
+        .et-footer__social a {
+            color: #fff;
+        }
+
+        .et-footer__address {}
+
+        .et-footer__address p {
+            padding: 5px;
+        }
+
+        .et-footer__address a {
+            text-decoration: none;
+            color: #fff;
+        }
+
+        /** Additional Body CSS Goes from Here*/
+    </style>
+</head>
+
+<body>
+    <div class="container container-header">
+        <div class="container-child">
+            <div class="et-header">
+                <div class="et-header__logo-left">
+                    <a href="{{siteURL}}"><img src="{{siteLogoURL}}" alt="Company Logo"></a>
+                </div>
+                <div class="et-header__icons-right social_icons">
+                    <a href="https://www.facebook.com/{{facebookProfileId}}">
+                        <img src="https://img.icons8.com/ios/24/000000/facebook-new.png" />
+                    </a>
+                    <a href="https://www.twitter.com/{{twitterProfileId}}">
+                        <img src="https://img.icons8.com/ios/24/000000/twitter--v1.png" />
+                    </a>
+                    <a href="https://www.instagram.com/{{instagramProfileId}}">
+                        <img src="https://img.icons8.com/ios/24/000000/instagram-new--v1.png" />
+                    </a>
+                    <a href="https://www.youtube.com/{{youtubeChannelId}}">
+                        <img src="https://img.icons8.com/ios/30/000000/youtube-play--v1.png" />
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>

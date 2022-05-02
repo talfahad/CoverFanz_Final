@@ -1,0 +1,41 @@
+{{>header}}
+  <div class='container container-body'>
+    <div class='container-child'>
+      <div class='et-body'>
+        <div class='et-body__image'>
+          <img
+            src='https://i.ibb.co/X7k6xwy/Untitled-design.png'
+            alt='Confirmation Email'
+          />
+        </div>
+        <div class='et-body__main'>
+          <h2 class='m-20'>Welcome to {{companyName}}!</h2>
+
+          <p>Hello {{userName}},</p>
+
+          <p>We have activated your user account on your email
+            <strong>{{userEmail}}</strong>. We are really happy to have you.
+          </p>
+
+          <p class='m-20'>You can login your account by clicking the link below.</p>
+
+          <div class='et-cta m-20'>
+            <div class='et-cta__link'>
+              <a href={{url}}>LOGIN ACCOUNT</a>
+            </div>
+          </div>
+
+          <div class='hr-line'>
+            <div class='hr-line__main'>
+              <hr />
+            </div>
+          </div>
+
+          <p>Just so you know. You can add more information about you in your profile. Just login and edit your details.</p>
+
+          <p>-- {{companyName}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+{{>footer}}
